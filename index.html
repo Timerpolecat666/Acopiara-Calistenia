@@ -30,21 +30,15 @@
         const [schedule, setSchedule] = useState(() => {
           const saved = localStorage.getItem('calistenia_data');
           let data = {};
-
           if (saved) {
             try { data = JSON.parse(saved); } catch (e) {}
           }
-
           users.forEach(u => {
             data[u] = data[u] || {};
             days.forEach(d => {
               if (!data[u][d]) data[u][d] = { text: '', status: 'none' };
-              if (typeof data[u][d] === 'string') {
-                data[u][d] = { text: data[u][d], status: 'none' };
-              }
             });
           });
-
           return data;
         });
 
@@ -53,10 +47,7 @@
         }, [schedule]);
 
         const updateText = (u, d, v) => {
-          setSchedule(s => ({
-            ...s,
-            [u]: { ...s[u], [d]: { ...s[u][d], text: v } }
-          }));
+          setSchedule(s => ({ ...s, [u]: { ...s[u], [d]: { ...s[u][d], text: v } } }));
         };
 
         const toggleStatus = (u, d, st) => {
@@ -85,9 +76,9 @@
           h('header', { className: 'flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-700 pb-6' },
             h('div', { className: 'flex items-center gap-3' },
               h('img', {
-                src: 'assets/images/dumbell.svg',
+                src: 'assets/images/dumbell.png',
                 alt: 'Ícone de halter',
-                className: 'w-12 h-12'
+                className: 'w-12 h-12 object-contain'
               }),
               h('div', null,
                 h('h1', { className: 'text-2xl font-bold tracking-tight' }, 'Acopiara Calistenia'),
@@ -101,11 +92,11 @@
             }, 'Limpar Tudo')
           ),
 
-          /* ILUSTRAÇÃO DECORATIVA */
+          /* IMAGEM DECORATIVA */
           h('img', {
-            src: 'assets/images/dumbell.svg',
+            src: 'assets/images/dumbell.png',
             alt: 'Ilustração decorativa',
-            className: 'w-32 opacity-20 mx-auto'
+            className: 'w-40 opacity-20 mx-auto'
           }),
 
           /* TABELA */
@@ -139,9 +130,7 @@
           ),
 
           /* FOOTER */
-          h('footer', { className: 'text-center text-slate-500 text-sm py-6' },
-            'Mantenham a consistência. O resultado vem com o tempo. 🔥'
-          )
+          h('footer', { className: 'text-center text-slate-500 text-sm py-6' }, 'Mantenham a consistência. O resultado vem com o tempo. 🔥')
         );
       }
 
