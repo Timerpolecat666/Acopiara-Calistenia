@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Acopiara Calistenia — Cronograma</title>
+    <meta name="description" content="Painel simples de cronograma de calistenia. Salva no localStorage e pronto para GitHub Pages." />
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+      textarea { font-family: inherit; }
+    </style>
+  </head>
+  <body class="antialiased bg-slate-900 text-slate-100">
+    <div id="root"></div>
+
+    <!-- React + ReactDOM (sem JSX, compatível com qualquer servidor estático) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <script>
+      const { useState, useEffect, createElement: h } = React;
+
+      function Icon({ symbol }) {
+        return h('span', null, symbol);
+      }
+
+      function App() {
+        const users = ['Erick', 'Gabriel', 'Brendo', 'Jonas', 'Leonardo'];
+        const days = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+
+        const [schedule, setSchedule] = useState(() => {
+          const saved = localStorage.getItem('calistenia_data');
+          let data = {};
+          if (saved) {
+            try { data = JSON.parse(saved); } catch(e) {}
+          }
+          users.forEach(u => {
+            data[u] = data[u] || {};
+            days.forEach(d => {
+              if (!data[u][d]) data[u][d] = { text: '', status: 'none' };
+              if (typeof data[u][d] === 'string') data[u][d] = { text: data[u][d], status: 'none' };
+            });
+          });
+          return data;
+        });
+
+        useEffect(() => {
+          localStorage.setItem('calistenia_data', JSON.stringify(schedule));
+        }, [schedule]);
+
+        const updateText = (u, d, v) => {
+          setSchedule(s => ({ ...s, [u]: { ...s[u], [d]: { ...s[u][d], text: v } } }));
+        };
+
+        const toggleStatus = (u, d, st) => {
+          setSchedule(s => ({
+            ...s,
+            [u]: {
+              ...s[u],
+              [d]: { ...s[u][d], status: s[u][d].status === st ? 'none' : st }
+            }
+          }));
+        };
+
+        const clearAll = () => {
+          if (!confirm('Tem certeza que deseja limpar toda a planilha?')) return;
+          const empty = {};
+          users.forEach(u => {
+            empty[u] = {};
+            days.forEach(d => empty[u][d] = { text: '', status: 'none' });
+          });
+          setSchedule(empty);
+        };
+
+        return h('div', { className: 'min-h-screen p-4 max-w-7xl mx-auto space-y-6' },
+          h('header', { className: 'flex justify-between items-center border-b border-slate-700 pb-4' },
+            h('h1', { className: 'text-2xl font-bold' }, 'Acopiara Calistenia'),
+            h('button', { onClick: clearAll, className: 'text-red-400' }, 'Limpar')
+          ),
+
+          h('div', { className: 'overflow-x-auto' },
+            h('table', { className: 'w-full min-w-[800px] border-collapse' },
+              h('thead', null,
+                h('tr', { className: 'bg-slate-800 text-slate-400' },
+                  h('th', { className: 'p-2 border' }, 'Atleta'),
+                  ...days.map(d => h('th', { key: d, className: 'p-2 border' }, d))
+                )
+              ),
+              h('tbody', null,
+                users.map(u => h('tr', { key: u, className: 'border-b border-slate-700' },
+                  h('td', { className: 'p-2 text-emerald-400' }, u),
+                  ...days.map(d => h('td', { key: d, className: 'p-2' },
+                    h('textarea', {
+                      className: 'w-full h-16 bg-transparent border border-slate-700 rounded p-1 text-sm',
+                      value: schedule[u][d].text,
+                      onChange: e => updateText(u, d, e.target.value)
+                    }),
+                    h('div', { className: 'flex gap-1 mt-1' },
+                      h('button', { onClick: () => toggleStatus(u, d, 'completed') }, '✅'),
+                      h('button', { onClick: () => toggleStatus(u, d, 'partial') }, '⚠️'),
+                      h('button', { onClick: () => toggleStatus(u, d, 'missed') }, '❌')
+                    )
+                  ))
+                ))
+              )
+            )
+          ),
+
+          h('footer', { className: 'text-center text-slate-500 text-sm pt-6' }, 'Mantenham a consistência. O resultado vem com o tempo.')
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(h(App));
+    </script>
+  </body>
+</html>
