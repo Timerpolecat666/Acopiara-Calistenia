@@ -16,16 +16,12 @@
   <body class="antialiased bg-slate-900 text-slate-100">
     <div id="root"></div>
 
-    <!-- React + ReactDOM (sem JSX, compatível com qualquer servidor estático) -->
+    <!-- React + ReactDOM (SEM JSX, compatível com GitHub Pages) -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
     <script>
       const { useState, useEffect, createElement: h } = React;
-
-      function Icon({ symbol }) {
-        return h('span', null, symbol);
-      }
 
       function App() {
         const users = ['Erick', 'Gabriel', 'Brendo', 'Jonas', 'Leonardo'];
@@ -34,16 +30,21 @@
         const [schedule, setSchedule] = useState(() => {
           const saved = localStorage.getItem('calistenia_data');
           let data = {};
+
           if (saved) {
-            try { data = JSON.parse(saved); } catch(e) {}
+            try { data = JSON.parse(saved); } catch (e) {}
           }
+
           users.forEach(u => {
             data[u] = data[u] || {};
             days.forEach(d => {
               if (!data[u][d]) data[u][d] = { text: '', status: 'none' };
-              if (typeof data[u][d] === 'string') data[u][d] = { text: data[u][d], status: 'none' };
+              if (typeof data[u][d] === 'string') {
+                data[u][d] = { text: data[u][d], status: 'none' };
+              }
             });
           });
+
           return data;
         });
 
@@ -52,7 +53,10 @@
         }, [schedule]);
 
         const updateText = (u, d, v) => {
-          setSchedule(s => ({ ...s, [u]: { ...s[u], [d]: { ...s[u][d], text: v } } }));
+          setSchedule(s => ({
+            ...s,
+            [u]: { ...s[u], [d]: { ...s[u][d], text: v } }
+          }));
         };
 
         const toggleStatus = (u, d, st) => {
@@ -76,29 +80,54 @@
         };
 
         return h('div', { className: 'min-h-screen p-4 max-w-7xl mx-auto space-y-6' },
-          h('header', { className: 'flex justify-between items-center border-b border-slate-700 pb-4' },
-            h('h1', { className: 'text-2xl font-bold' }, 'Acopiara Calistenia'),
-            h('button', { onClick: clearAll, className: 'text-red-400' }, 'Limpar')
+
+          /* HEADER */
+          h('header', { className: 'flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-700 pb-6' },
+            h('div', { className: 'flex items-center gap-3' },
+              h('img', {
+                src: 'assets/images/dumbell.svg',
+                alt: 'Ícone de halter',
+                className: 'w-12 h-12'
+              }),
+              h('div', null,
+                h('h1', { className: 'text-2xl font-bold tracking-tight' }, 'Acopiara Calistenia'),
+                h('p', { className: 'text-slate-400 text-sm' }, 'Painel de Controle de Treinos')
+              )
+            ),
+
+            h('button', {
+              onClick: clearAll,
+              className: 'px-4 py-2 rounded-lg bg-red-900/30 hover:bg-red-900/50 text-red-400 text-sm border border-red-900/30'
+            }, 'Limpar Tudo')
           ),
 
-          h('div', { className: 'overflow-x-auto' },
+          /* ILUSTRAÇÃO DECORATIVA */
+          h('img', {
+            src: 'assets/images/dumbell.svg',
+            alt: 'Ilustração decorativa',
+            className: 'w-32 opacity-20 mx-auto'
+          }),
+
+          /* TABELA */
+          h('div', { className: 'overflow-x-auto rounded-xl border border-slate-700 shadow-2xl shadow-black/50' },
             h('table', { className: 'w-full min-w-[800px] border-collapse' },
               h('thead', null,
-                h('tr', { className: 'bg-slate-800 text-slate-400' },
-                  h('th', { className: 'p-2 border' }, 'Atleta'),
-                  ...days.map(d => h('th', { key: d, className: 'p-2 border' }, d))
+                h('tr', { className: 'bg-slate-800 text-slate-400 text-xs uppercase' },
+                  h('th', { className: 'p-3 border border-slate-700' }, 'Atleta'),
+                  ...days.map(d => h('th', { key: d, className: 'p-3 border border-slate-700' }, d))
                 )
               ),
               h('tbody', null,
                 users.map(u => h('tr', { key: u, className: 'border-b border-slate-700' },
-                  h('td', { className: 'p-2 text-emerald-400' }, u),
+                  h('td', { className: 'p-3 text-emerald-400 font-medium' }, u),
                   ...days.map(d => h('td', { key: d, className: 'p-2' },
                     h('textarea', {
-                      className: 'w-full h-16 bg-transparent border border-slate-700 rounded p-1 text-sm',
+                      className: 'w-full h-20 bg-transparent resize-none rounded p-2 text-sm border border-slate-700 focus:ring-1 focus:ring-emerald-500 outline-none',
                       value: schedule[u][d].text,
+                      placeholder: 'Insira o treino...',
                       onChange: e => updateText(u, d, e.target.value)
                     }),
-                    h('div', { className: 'flex gap-1 mt-1' },
+                    h('div', { className: 'flex gap-1 justify-end mt-1' },
                       h('button', { onClick: () => toggleStatus(u, d, 'completed') }, '✅'),
                       h('button', { onClick: () => toggleStatus(u, d, 'partial') }, '⚠️'),
                       h('button', { onClick: () => toggleStatus(u, d, 'missed') }, '❌')
@@ -109,7 +138,10 @@
             )
           ),
 
-          h('footer', { className: 'text-center text-slate-500 text-sm pt-6' }, 'Mantenham a consistência. O resultado vem com o tempo.')
+          /* FOOTER */
+          h('footer', { className: 'text-center text-slate-500 text-sm py-6' },
+            'Mantenham a consistência. O resultado vem com o tempo. 🔥'
+          )
         );
       }
 
